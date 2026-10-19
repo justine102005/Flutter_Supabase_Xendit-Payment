@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/payment_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -9,22 +9,31 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  final PaymentService _paymentService = PaymentService();
+  final SupabaseClient _supabase = Supabase.instance.client;
+  late Future<List<Map<String, dynamic>>> _ordersFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _ordersFuture = _fetchOrders();
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchOrders() async {
+    final response = await _supabase
+        .from('orders')
+        .select()
+        .order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(response);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order History'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => setState(() {}),
-          ),
-        ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _paymentService.fetchOrders(),
+        future: _ordersFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -32,61 +41,53 @@ class _OrdersScreenState extends State<OrdersScreen> {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-
           final orders = snapshot.data ?? [];
           if (orders.isEmpty) {
-            return const Center(child: Text('No orders yet.'));
+            return const Center(child: Text('No orders found.'));
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(12),
             itemCount: orders.length,
+            padding: const EdgeInsets.all(12),
             itemBuilder: (context, index) {
               final order = orders[index];
-              final String status = order['status'] ?? 'PENDING';
-              final bool isPaid = status == 'PAID';
+              final isPaid = order['status'] == 'PAID';
 
               return Card(
-                margin: const EdgeInsets.only(bottom: 10),
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                elevation: 2,
                 child: ListTile(
                   leading: Icon(
-                    isPaid ? Icons.check_circle : Icons.schedule,
+                    isPaid ? Icons.check_circle : Icons.access_time,
                     color: isPaid ? Colors.green : Colors.orange,
-                    size: 36,
+                    size: 32,
                   ),
                   title: Text(
-                    order['product_name'] ?? 'Item',
+                    order['product_name'] ?? 'Product',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('Ref: ${order['external_id']}'),
+                  subtitle: Text('Ref: order_${order['id']}'),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '₱${(order['amount'] ?? 0).toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        '₱${order['amount']}',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: isPaid
-                              ? Colors.green.shade100
-                              : Colors.orange.shade100,
+                          color: isPaid ? Colors.green : Colors.orange,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          status,
-                          style: TextStyle(
-                            fontSize: 12,
+                          order['status'] ?? 'PENDING',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: isPaid
-                                ? Colors.green.shade800
-                                : Colors.orange.shade800,
                           ),
                         ),
                       ),

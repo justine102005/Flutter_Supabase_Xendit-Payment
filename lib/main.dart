@@ -3,8 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/app_config.dart';
 import 'screens/product_list_screen.dart';
 
-Future<void> main() async {
-  // Ensures Flutter is ready before calling async code like Supabase.initialize
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
@@ -12,22 +11,22 @@ Future<void> main() async {
     anonKey: AppConfig.supabaseAnonKey,
   );
 
-  runApp(const StudentEcommerceApp());
+  runApp(const StudentShopApp());
 }
 
-class StudentEcommerceApp extends StatelessWidget {
-  const StudentEcommerceApp({super.key});
+class StudentShopApp extends StatelessWidget {
+  const StudentShopApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Student Shop',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        primarySwatch: Colors.indigo,
         useMaterial3: true,
       ),
       home: const ProductListScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

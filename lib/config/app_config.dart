@@ -1,5 +1,4 @@
 class AppConfig {
-  // Replace with your Supabase Project URL and Anon (Public) Key
-  static const String supabaseUrl = 'YOUR_SUPABASE_URL';
-  static const String supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+  static const String supabaseUrl = 'https://nuafzzhxnwgkpubdqnxe.supabase.co';
+  static const String supabaseAnonKey = 'sb_publishable_efNN4KZj4d5qptn6dsEuLg__Xrv9deL';
 }

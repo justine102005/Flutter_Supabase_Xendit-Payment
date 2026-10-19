@@ -1,23 +1,22 @@
 class Product {
   final int id;
   final String name;
-  final num price;
-  final String imageUrl;
+  final double price;
+  final String? imageUrl;
 
   Product({
     required this.id,
     required this.name,
     required this.price,
-    required this.imageUrl,
+    this.imageUrl,
   });
 
-  // Converts a raw database Map from Supabase into a safe Dart object
-  factory Product.fromMap(Map<String, dynamic> map) {
+  factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: map['id'] ?? 0,
-      name: map['name'] ?? 'Unnamed Item',
-      price: map['price'] ?? 0,
-      imageUrl: map['image_url'] ?? '',
+      id: json['id'],
+      name: json['name'],
+      price: (json['price'] as num).toDouble(),
+      imageUrl: json['image_url'],
     );
   }
 }
